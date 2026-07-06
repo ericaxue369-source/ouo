@@ -182,9 +182,9 @@ const CEO_CONTACTS = {
     {id:"cc1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"好的，感谢CEO百忙中回复！期待下一步～",time:"2小时前",unread:0,isCandidate:true},
   ],
   chatMe:[
-    {id:"cm1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"面试报告 · AI产品经理 · 82分 ⭐ 优秀",time:"今天 10:30",unread:0,candidateId:"c1",isExcellent:true},
-    {id:"cm2",user:{name:"陈晓雨",  seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试报告 · AI产品经理 · 76分",        time:"今天 09:15",unread:0,candidateId:"c2",isExcellent:false},
-    {id:"cm3",user:{name:"李宇航",  seed:"liyuhang",  bg:"d4edda"},lastMsg:"面试报告 · 增长运营负责人 · 88分 ⭐ 优秀",time:"昨天 16:40",unread:0,candidateId:"c3",isExcellent:true},
+    {id:"cm1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分 ⭐ 优秀",time:"今天 10:30",unread:0,candidateId:"c1",isExcellent:true},
+    {id:"cm2",user:{name:"陈晓雨",  seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试反馈 · AI产品经理 · 表现一般 · 76分",        time:"今天 09:15",unread:0,candidateId:"c2",isExcellent:false},
+    {id:"cm3",user:{name:"李宇航",  seed:"liyuhang",  bg:"d4edda"},lastMsg:"面试反馈 · 增长运营负责人 · 非常好 · 88分 ⭐ 优秀",time:"昨天 16:40",unread:0,candidateId:"c3",isExcellent:true},
   ],
 };
 
@@ -196,8 +196,8 @@ const USER_CONTACTS = {
       {id:"uc2",user:{name:"Sabrina LU",seed:"Sabrina", bg:"d1d4f9"},             lastMsg:"可以的，下次继续聊～",                    time:"10分钟前",unread:2},
     ],
     interview:[
-      {id:"ui1",user:{name:"Alex Chen", seed:"AlexCeo", bg:"ffd6e0",isCeo:true},  lastMsg:"面试报告 · AI产品经理 · 78分 · 已完成",   time:"1小时前",unread:0,ceoInvite:true},
-      {id:"ui2",user:{name:"Linda Wei", seed:"LindaCeo",bg:"d4edda",isCeo:true},  lastMsg:"面试报告 · 前端开发工程师 · 等待面试",     time:"4天前",  unread:0},
+      {id:"ui1",user:{name:"Alex Chen", seed:"AlexCeo", bg:"ffd6e0",isCeo:true},  lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 已完成",   time:"1小时前",unread:0,ceoInvite:true,jobTitle:"AI产品经理",reportScore:78},
+      {id:"ui2",user:{name:"Linda Wei", seed:"LindaCeo",bg:"d4edda",isCeo:true},  lastMsg:"面试反馈 · 前端开发工程师 · 等待面试",     time:"4天前",  unread:0},
     ],
   },
   chatMe:[
@@ -1105,56 +1105,122 @@ function DetailScreen({ user, onBack, onChat, onStartInterview, companyProfile, 
 // ─────────────────────────────────────────────────────────────────────────────
 // CHAT + INTERVIEW UNIFIED (优化3 + 优化4 + 优化5)
 // ─────────────────────────────────────────────────────────────────────────────
+function buildInterviewFeedback({ candidate=null, job=null, score=78 }={}){
+  const role = (job&&job.title) || (candidate&&candidate.job) || "目标岗位";
+  const base = {
+    summary:`你本次${role}面试整体表现较好。你在回答中能够围绕问题展开，表达比较清楚，也能结合过往经历说明自己的判断依据，体现出不错的基础能力和岗位理解。比较突出的地方是沟通表达、业务理解和项目推进意识；还可以继续提升的是结构化表达、数据结果呈现和项目复盘深度。建议你继续保持主动拆解问题的习惯，并在后续面试中多补充量化结果、关键取舍和复盘结论，让能力呈现更完整。`,
+    strengths:[
+      {title:"表达清晰，沟通意识较好",text:"你在自我介绍和项目说明中能够把背景、目标和个人职责讲清楚，整体表达自然顺畅，比较容易让面试官抓住重点。"},
+      {title:"岗位理解较扎实",text:`围绕${role}的核心要求，你能结合产品目标、用户需求和团队协作展开回答，说明你对岗位职责有一定理解。`},
+      {title:"有项目推进经验",text:"你在介绍过往经历时，能够说明自己如何参与需求判断、方案落地和跨团队沟通，体现出一定的执行力和协作意识。"},
+    ],
+    improvements:[
+      {title:"结构化表达还可以加强",text:"部分回答的信息量比较多，但层次拆分不够明显，建议以后使用“背景-目标-行动-结果-复盘”的方式展开，让重点更突出。"},
+      {title:"数据结果呈现不够充分",text:"你能说明自己做了什么，但对指标变化、业务收益和验证方式讲得还不够具体，建议提前准备关键项目的量化数据。"},
+      {title:"复盘深度有待提升",text:"在讲项目结果时，对失败原因、取舍逻辑和下一步优化的总结偏少，建议每完成一个项目后系统整理经验、问题和可复用方法。"},
+    ],
+  };
+  const byId = {
+    c1:{
+      summary:"你本次 AI 产品经理面试整体表现比较好。你在表达项目经历时条理清晰，能够围绕用户痛点、需求判断和方案落地展开说明，让面试官比较容易理解你的产品思路。比较突出的地方是产品分析能力、从 0 到 1 的项目经验和沟通协作意识；还可以继续加强的是商业指标表达和项目复盘深度。建议你继续保持清晰表达和用户视角，并在后续面试中补充更多量化数据、业务收益和项目复盘，这会让你的能力呈现更有说服力。", 
+      strengths:[
+        {title:"产品分析能力较强",text:"在介绍教育直播项目时，你能够从师生互动体验差这一痛点切入，并说明如何围绕互动工具做系统设计，体现出较好的需求拆解能力。"},
+        {title:"从 0 到 1 经验较完整",text:"你能够讲清自己在项目中的角色、关键决策和落地过程，说明你的过往经历与 AI 产品经理岗位的核心要求匹配度较高。"},
+        {title:"沟通表达比较清楚",text:"你的回答信息组织较顺，能够用较自然的语言解释复杂项目，这对于需要频繁协调算法、研发和业务团队的岗位很重要。"},
+      ],
+      improvements:[
+        {title:"商业指标表达不够充分",text:"你能讲清产品方案，但对上线后的转化、留存或收入影响说明较少，建议补充关键指标变化来证明方案价值。"},
+        {title:"复盘深度还可以加强",text:"你的项目介绍更多集中在做法和结果，对遇到的失败尝试、取舍原因和下一步优化讲得不多，建议用固定模板沉淀项目复盘。"},
+        {title:"时间控制需要更稳",text:"你的部分回答内容较丰富但略偏展开，建议提前准备 1 分钟、3 分钟两个版本，保证重点优先、节奏更紧凑。"},
+      ],
+    },
+    c2:{
+      summary:"你本次 AI 产品经理面试整体表现一般，有一些亮点，但稳定性还可以继续提升。你能够说明自己的 B 端 SaaS 产品经历，也能表达对产品工作的基本理解，说明你具备一定基础。相对不足的是回答偏概括，案例细节、个人贡献和结果数据不够充分，导致你的岗位匹配度没有完全体现出来。建议你继续保持对用户和业务问题的敏感度，同时重点训练结构化表达，并提前准备更完整的项目案例和复盘材料。",
+      strengths:[
+        {title:"具备产品基础认知",text:"你能说明自己过去主要负责的产品方向，对需求、用户和业务目标之间的关系有基本理解。"},
+        {title:"表达态度比较真诚",text:"你在回答中能够比较坦诚地介绍自己的经历边界，没有过度包装，这有助于面试官更准确地理解你的真实能力。"},
+        {title:"有 B 端业务经验",text:"你的 SaaS 背景与部分 AI 教育管理场景存在可迁移性，如果能补充更多场景细节，会更容易体现你的经验价值。"},
+      ],
+      improvements:[
+        {title:"案例展开不够具体",text:"你在介绍项目时更多停留在职责描述，对用户问题、方案取舍和最终结果讲得较少，建议准备 2-3 个 STAR 案例。"},
+        {title:"个人贡献需要更清楚",text:"你的部分回答中团队成果和个人动作混在一起，建议明确说明“我负责什么、我推动了什么、我解决了什么问题”。"},
+        {title:"结构化表达能力有待提升",text:"你的回答偶尔会先说结论再补背景，逻辑顺序不够稳定，建议按照“问题-分析-行动-结果”展开论述。"},
+      ],
+    },
+    c3:{
+      summary:"你本次增长运营负责人面试整体表现非常好。你能够结合 Keep 和滴滴的增长经历说明策略制定、实验推进和结果复盘，整体表达有重点，也体现出比较明确的数据意识。你的增长方法论、项目推进能力和结果导向都比较突出；还可以继续加强的是对创业早期资源受限场景下取舍策略的说明。建议你继续保持数据驱动和快速试错的优势，同时补充更多小团队、低预算情况下的增长策略，这会让你的负责人能力呈现更完整。",
+      strengths:[
+        {title:"增长方法论较成熟",text:"你能够围绕获客、激活、留存和转化拆解增长问题，说明你对增长链路有比较系统的理解。"},
+        {title:"数据意识和结果导向强",text:"你在回答中主动提到 GMV 增长等结果，能够用数据支撑项目价值，这对增长负责人岗位非常关键。"},
+        {title:"项目推动能力较好",text:"从你的过往经历看，你能够跨团队推进实验、复盘结果并持续迭代，符合创业团队对增长负责人的要求。"},
+      ],
+      improvements:[
+        {title:"资源约束下的策略还可细化",text:"你对成熟平台增长讲得比较充分，但对早期团队预算有限、品牌弱的情况下如何启动增长还可以讲得更具体。"},
+        {title:"团队管理经验需要补充",text:"作为负责人岗位，建议进一步说明如何设定目标、拆分任务、培养成员和建立增长 SOP。"},
+        {title:"风险判断可以更前置",text:"在增长实验介绍中，建议同步说明潜在风险、止损条件和用户体验边界，让方案显得更完整。"},
+      ],
+    },
+  };
+  return _nullishCoalesce(byId[_optionalChain([candidate,'optionalAccess',_r=>_r.id])], () => (base));
+}
+
+function FeedbackSection({ title, children, accent="#059669" }){
+  return React.createElement('div', { style:{marginBottom:14} }
+    , React.createElement('div', { style:{display:"flex",alignItems:"center",gap:7,fontSize:13,fontWeight:800,color:accent,marginBottom:8} }
+      , React.createElement('span', { style:{width:6,height:6,borderRadius:"50%",background:accent,flexShrink:0} })
+      , title
+    )
+    , children
+  );
+}
+
+function FeedbackList({ items, accent }){
+  return React.createElement('div', { style:{display:"flex",flexDirection:"column",gap:8} }
+    , items.map(item=>React.createElement('div', { key:item.title, style:{background:"rgba(255,255,255,.72)",border:"1px solid rgba(15,23,42,.06)",borderRadius:12,padding:"10px 12px"} }
+      , React.createElement('div', { style:{fontSize:12.5,fontWeight:800,color:accent,marginBottom:4} }, item.title)
+      , React.createElement('div', { style:{fontSize:12.5,color:"#374151",lineHeight:1.75} }, item.text)
+    ))
+  );
+}
+
+function FeedbackContent({ feedback, compact=false }){
+  return React.createElement(React.Fragment, null
+    , React.createElement(FeedbackSection, { title:"整体总结", accent:"#047857" }
+      , React.createElement('div', { style:{fontSize:compact?12.3:13,color:"#374151",lineHeight:1.85,padding:"12px 14px",background:"rgba(255,255,255,.74)",border:"1px solid rgba(16,185,129,.12)",borderRadius:12} }, feedback.summary)
+    )
+    , React.createElement(FeedbackSection, { title:"面试优点", accent:"#059669" }
+      , React.createElement(FeedbackList, { items:feedback.strengths, accent:"#047857" })
+    )
+    , React.createElement(FeedbackSection, { title:"面试建议", accent:"#d97706" }
+      , React.createElement(FeedbackList, { items:feedback.improvements, accent:"#b45309" })
+    )
+  );
+}
+
 // 候选人面试报告卡（用户与 CEO 看到的是同一份，内容一致）
-function UserReportCard({ job, score, isCollapsed, onExpand, onCollapse, footerLabel }){
-  const dims=[["专业能力",80],["沟通表达",82],["逻辑思维",75],["岗位匹配",76]];
+function UserReportCard({ job, score, candidate=null, isCollapsed, onExpand, onCollapse, footerLabel }){
+  const safeJob=job||{id:"report",title:"目标岗位"};
+  const feedback=buildInterviewFeedback({candidate,job:safeJob,score});
   return React.createElement('div', { style:{margin:"4px 0"} }
     , isCollapsed ? (
       React.createElement('div', { onClick:onExpand, style:{background:"linear-gradient(135deg,#f0fdf4,#ecfdf5)",border:"1.5px solid rgba(16,185,129,.2)",borderRadius:14,padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between"} }
         , React.createElement('div', { style:{display:"flex",alignItems:"center",gap:10} }
           , React.createElement('span', { style:{fontSize:18} }, "📋")
           , React.createElement('div', null
-            , React.createElement('div', { style:{fontSize:13,fontWeight:700,color:T.text1} }, job.title, " · 面试报告")
-            , React.createElement('div', { style:{fontSize:11,color:T.text3} }, "综合评分 ", score, "分 · 已完成 · 2026-06-10")
+            , React.createElement('div', { style:{fontSize:13,fontWeight:700,color:T.text1} }, safeJob.title, " · 面试反馈")
+            , React.createElement('div', { style:{fontSize:11,color:T.text3} }, "整体总结 / 面试优点 / 面试建议")
           )
         )
-        , React.createElement('span', { style:{fontSize:12,color:"#059669",fontWeight:600} }, "▶ 查看报告")
+        , React.createElement('span', { style:{fontSize:12,color:"#059669",fontWeight:600} }, "▶ 查看反馈")
       )
     ) : (
       React.createElement('div', { style:{background:"linear-gradient(135deg,#f0fdf4,#ecfdf5)",border:"1.5px solid rgba(16,185,129,.25)",borderRadius:18,padding:"20px",boxShadow:"0 4px 20px rgba(16,185,129,.08)",maxHeight:500,overflowY:"auto"} }
         , React.createElement('div', { style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16} }
-          , React.createElement('div', { style:{fontSize:16,fontWeight:800,color:"#065f46"} }, "📄 面试报告")
+          , React.createElement('div', { style:{fontSize:16,fontWeight:800,color:"#065f46"} }, "📄 面试反馈")
           , React.createElement('button', { onClick:onCollapse, style:{background:"none",border:"none",cursor:"pointer",fontSize:12,color:"#059669",fontWeight:600} }, "收起 ▲")
         )
-        , React.createElement('div', { style:{fontSize:12,color:"#6b7280",marginBottom:12} }, "岗位：", job.title, " · LUNA AI")
-        , React.createElement('div', { style:{background:"rgba(16,185,129,.08)",borderRadius:14,padding:"14px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:14} }
-          , React.createElement('div', { style:{textAlign:"center",flexShrink:0} }
-            , React.createElement('div', { style:{fontSize:36,fontWeight:900,color:"#059669"} }, score)
-            , React.createElement('div', { style:{fontSize:10,color:"#6b7280"} }, "综合匹配度")
-          )
-          , React.createElement('div', { style:{flex:1} }, dims.map(([name,val])=>(
-              React.createElement('div', { key:name, style:{display:"flex",alignItems:"center",gap:8,marginBottom:7} }
-                , React.createElement('span', { style:{fontSize:11,color:"#6b7280",width:56,flexShrink:0} }, name)
-                , React.createElement('div', { style:{flex:1,height:5,background:"rgba(16,185,129,.15)",borderRadius:999} }
-                  , React.createElement('div', { style:{height:"100%",background:"linear-gradient(90deg,#10b981,#059669)",borderRadius:999,width:`${val}%`} })
-                )
-                , React.createElement('span', { style:{fontSize:11,color:"#059669",fontWeight:700,width:24} }, val)
-              )
-            )))
-        )
-        , React.createElement('div', { style:{fontSize:13,color:"#374151",lineHeight:1.8,marginBottom:14,padding:"12px 14px",background:"rgba(255,255,255,.7)",borderRadius:12} }, "本次面试中，候选人表达清晰，逻辑结构较完整。在产品分析能力方面表现较好，对 AI 教育赛道有一定的行业认知深度。建议进一步提升商业思维及数据驱动能力，在项目拆解上可以更加结构化。")
-        , React.createElement('div', { style:{marginBottom:12} }
-          , React.createElement('div', { style:{fontSize:12,fontWeight:700,color:"#065f46",marginBottom:6} }, "✓ 优势亮点")
-          , ["表达能力较强，逻辑清晰","产品分析思路完整","对 AI 教育行业有深度理解","从 0 到 1 的产品经验丰富"].map(item=>(
-            React.createElement('div', { key:item, style:{fontSize:12,color:"#047857",marginBottom:3,paddingLeft:8} }, "· ", item)
-          ))
-        )
-        , React.createElement('div', { style:{marginBottom:18} }
-          , React.createElement('div', { style:{fontSize:12,fontWeight:700,color:"#b45309",marginBottom:6} }, "• 建议提升")
-          , ["商业分析与数据驱动意识","项目拆解的结构化表达","跨团队协作的沟通策略"].map(item=>(
-            React.createElement('div', { key:item, style:{fontSize:12,color:"#92400e",marginBottom:3,paddingLeft:8} }, "· ", item)
-          ))
-        )
+        , React.createElement('div', { style:{fontSize:12,color:"#6b7280",marginBottom:12} }, "岗位：", safeJob.title, " · LUNA AI")
+        , React.createElement(FeedbackContent, { feedback })
         , footerLabel?React.createElement('button', { onClick:onCollapse, style:{width:"100%",padding:"13px 0",borderRadius:999,background:"linear-gradient(90deg,#10b981,#059669)",color:"#fff",fontWeight:700,fontSize:14,border:"none",cursor:"pointer"} }, footerLabel):null
       )
     )
@@ -1534,26 +1600,95 @@ function ChatScreen({ user, onBack, withCountdown=false, initialInterview=null, 
 // ─────────────────────────────────────────────────────────────────────────────
 // 候选人聊天（CEO视角）
 // ─────────────────────────────────────────────────────────────────────────────
-// CEO 专属候选人评估报告（仅 CEO 可见，简洁、专业、国际化）
+// CEO 专属候选人评估报告（仅 CEO 可见）
 function buildCeoReport(c){
   const base=c.score||80;
   const clamp=n=>Math.max(58,Math.min(98,Math.round(n)));
-  const dims=[
-    { name:"专业能力", en:"Competency",     score:clamp(base+6) },
-    { name:"经验匹配", en:"Experience",     score:clamp(base+2) },
-    { name:"结构化思维", en:"Reasoning",     score:clamp(base+4) },
-    { name:"沟通协作", en:"Communication",  score:clamp(base-2) },
-    { name:"文化匹配", en:"Culture Fit",    score:clamp(base-4) },
-    { name:"抗压稳定", en:"Resilience",     score:clamp(base-6) },
-  ];
-  const overall=clamp(dims.reduce((s,d)=>s+d.score,0)/dims.length);
-  const tier = overall>=88?{cn:"强烈推荐",en:"Strong Hire",color:"#059669",bg:"rgba(16,185,129,.12)"}
-             : overall>=80?{cn:"推荐",    en:"Hire",       color:"#4f46e5",bg:"rgba(99,102,241,.12)"}
-             : overall>=72?{cn:"谨慎推荐",en:"Lean Hire",  color:"#d97706",bg:"rgba(245,158,11,.12)"}
-             :             {cn:"暂缓",    en:"Hold",       color:"#6b7280",bg:"rgba(107,114,128,.12)"};
-  const verdict="整体能力与岗位要求匹配度较高，专业深度与结构化思维突出，回答可落地。建议终面重点核实跨团队协作与创业期高强度节奏的适应度。";
-  const next= overall>=85?"推进至 CEO 终面":overall>=75?"安排团队复试":"补充评估后再定";
-  return { overall, dims, tier, verdict, next };
+  const total=clamp(base);
+  const isExcellent=total>=85;
+  const tier = isExcellent?{cn:"优秀候选人",color:"#059669",bg:"rgba(16,185,129,.12)"}
+             : total>=80?{cn:"推荐候选人",color:"#4f46e5",bg:"rgba(99,102,241,.12)"}
+             : total>=72?{cn:"谨慎推荐",color:"#d97706",bg:"rgba(245,158,11,.12)"}
+             :          {cn:"暂缓推进",color:"#6b7280",bg:"rgba(107,114,128,.12)"};
+  const baseReport={
+    total,
+    isExcellent,
+    tier,
+    overallText:`候选人在${c.job}面试中的整体表现较好，能够围绕问题给出完整回答，表达也比较清楚。比较突出的维度是岗位理解、沟通表达和项目推进意识，回答中能看到他对业务目标和团队协作的基本判断。相对较弱的是数据化证明和项目复盘深度，部分回答还停留在“做了什么”，对“为什么这样做、结果如何验证”说明不足。与 CEO 在访谈中提到的理想候选人画像相比，候选人满足“主动拆解问题、能跨团队推进、愿意在创业环境中承担责任”的部分要求。差异在于候选人对高强度创业节奏、资源有限情况下的优先级取舍，还没有给出足够具体的案例。综合来看，岗位匹配度中等偏高，可以进入下一步，但需要在复试中重点验证实际落地能力和数据敏感度。`,
+    excellentReason:"",
+    nextInterviewAdvice:"",
+    dimensions:[
+      {name:"岗位理解",grade:total>=82?"A":"B",reason:`候选人在回答${c.job}相关问题时，能够说明自己对岗位职责和业务目标的理解，并尝试把过往经历与当前岗位连接起来。这反映出候选人具备一定的角色意识和问题拆解能力。与 CEO 理想画像中“能快速理解业务、主动推进关键事项”的要求相比，候选人已经部分满足。不同之处在于，他对公司当前阶段的关键矛盾和资源约束讲得还不够细，需要进一步确认能否适应早期团队节奏。`},
+      {name:"结构化思维",grade:total>=85?"A":total>=74?"B":"C",reason:"候选人多数回答能够按照背景、行动和结果展开，整体逻辑比较容易跟上。回答中能看到一定的拆解意识，也能把复杂项目讲成几个关键环节。与 CEO 希望看到的“先抓主要矛盾，再给出可执行方案”相比，候选人已具备基础框架。欠缺之处是部分回答层次仍然不够稳定，对复盘和取舍原因的表达还可以更系统。"},
+      {name:"结果意识",grade:total>=88?"A":total>=78?"B":"C",reason:"候选人能提到项目成果，但对核心指标、验证方式和业务收益的呈现还不够充分。这说明他有结果导向的意识，但证据链还不够完整。CEO 曾强调理想候选人需要能对目标负责、能用数据判断方案效果，候选人在这一点上部分满足。后续需要追问具体指标口径、项目上线后的变化，以及候选人本人对结果负责到什么程度。"},
+      {name:"沟通协作",grade:total>=80?"A":"B",reason:"候选人在面试中表达态度稳定，能够清楚说明自己和团队之间的协作方式，也能解释自己在项目中的具体角色。这体现出较好的沟通意识和一定的团队协同能力。与 CEO 提到的“能和产品、技术、业务高频协作”的画像较为接近。需要进一步确认的是，在冲突场景或资源紧张时，候选人是否能推动关键决策而不是只完成分内工作。"},
+    ],
+    process:[
+      {stage:"自我介绍阶段",text:`候选人介绍了自己的基础经历和与${c.job}相关的项目背景，重点讲述了自己过去承担的职责，并表达了对该岗位方向的兴趣。整体表达比较顺畅，但对核心优势的提炼还可以更集中。`},
+      {stage:"过往项目讲解阶段",text:"候选人围绕一个代表性项目说明了项目背景、主要问题和自己的参与方式，能够讲清项目推进的大致过程。追问到项目结果时，候选人能给出方向性描述，但量化指标和关键复盘还不够充分。"},
+      {stage:"能力追问阶段",text:"在被追问问题拆解、团队协作和业务判断时，候选人能够给出基本判断，说明具备一定实操经验。回答中的不足是对复杂场景的取舍逻辑还不够深入，部分结论需要更多案例支撑。"},
+    ],
+  };
+  const byId={
+    c1:{
+      total,
+      isExcellent,
+      tier,
+      overallText:"张明在 AI 产品经理面试中的整体表现较好，回答完整度和表达清晰度都比较稳定。他最突出的维度是产品分析能力和从 0 到 1 的项目经验，能围绕教育直播项目说明用户痛点、需求判断和功能设计逻辑。沟通表达也比较好，能把复杂项目拆成面试官容易理解的几个部分。相对较弱的是商业指标和复盘深度，对上线后转化、留存或收入影响讲得不够具体。与 CEO 在访谈中提到的理想候选人画像相比，张明满足“理解用户、能推动产品落地、能与研发协作”的要求。差异在于他还需要证明自己是否能在创业公司里更主动地对业务结果负责。综合判断，他与 AI 产品经理岗位匹配度较高，建议进入下一轮复试并重点核实业务结果意识。",
+      excellentReason:"",
+      nextInterviewAdvice:"",
+      dimensions:[
+        {name:"产品分析能力",grade:"A",reason:"张明在回答从 0 到 1 项目经历时，能够从“师生互动体验差”这个具体痛点切入，并说明自己如何围绕互动工具做系统性设计。这类回答体现出他具备较强的用户问题识别能力和产品方案拆解能力。与 CEO 希望的“能理解真实用户、能把模糊问题转成可落地方案”的画像比较接近。不同之处在于，他对方案优先级和资源约束下的取舍讲得还不够充分。"},
+        {name:"岗位匹配度",grade:"A",reason:"张明的教育产品经验和 AI 产品经理岗位有较强相关性，回答中也能自然连接到当前公司的 AI 教育方向。他能说明自己在项目中的职责、关键决策和落地过程，说明经验不是停留在旁观层面。CEO 理想候选人需要既懂用户也能推动研发协作，张明在这两点上都有一定匹配。仍需进一步确认的是，他能否承担更高层级的业务目标，而不只是负责功能模块。"},
+        {name:"数据与商业意识",grade:"B",reason:"张明能够讲清产品方案，但对上线后的转化、留存或收入影响说明较少。这说明他对产品价值有判断，但用数据证明价值的习惯还不够强。CEO 曾强调岗位需要对关键指标负责，张明目前只部分满足这一点。下一轮可以重点追问他负责项目的指标口径、数据变化和失败实验。"},
+        {name:"沟通表达",grade:"A",reason:"张明回答时信息组织较顺，能够用自然语言解释项目背景和个人动作。这样的表达方式有利于跨团队沟通，也符合 CEO 对产品负责人的沟通期待。他的优势是重点比较清楚，不会让面试官迷失在细节里。需要提升的是时间控制，部分回答如果更紧凑，会显得更成熟。"},
+      ],
+      process:[
+        {stage:"自我介绍阶段",text:"张明介绍了自己 5 年产品经验和教育产品背景，重点讲述了在字节参与 K12 在线课堂相关产品的经历，表达了对 AI 教育岗位的兴趣。整体表达清楚，能快速建立与岗位的相关性。"},
+        {stage:"过往项目讲解阶段",text:"张明讲述了教育直播功能从 0 到 1 的经历，项目核心问题是师生互动体验不足，他主要负责需求判断和互动工具方案设计。项目推进逻辑比较完整，但最终结果的量化数据还可以补充。"},
+        {stage:"项目反思阶段",text:"在追问项目反思时，张明能够意识到产品方案和业务指标之间需要更强连接，但对失败尝试和优化路径展开不多。建议下一轮围绕商业指标、项目复盘和团队协同冲突继续追问。"},
+      ],
+    },
+    c2:{
+      total,
+      isExcellent,
+      tier,
+      overallText:"陈晓雨在 AI 产品经理面试中的整体表现一般，能够完成基础回答，但亮点呈现不够强。她比较突出的维度是产品基础认知和 B 端 SaaS 经验，能说明自己过去负责的方向，也能表达对需求和业务目标的理解。较弱的维度是案例细节、个人贡献和结果证明，很多回答偏概括，缺少能支撑能力判断的关键证据。与 CEO 提到的理想候选人画像相比，她部分满足“有产品经验、愿意沟通协作”的要求。不同之处在于，她还没有充分体现“能独立拆解复杂问题、能对结果负责、能在创业环境中快速推进”的特质。综合判断，她与岗位有一定相关性，但匹配度仍需谨慎评估。",
+      excellentReason:"",
+      nextInterviewAdvice:"",
+      dimensions:[
+        {name:"产品基础认知",grade:"B",reason:"陈晓雨能说明自己过去主要做 B 端 SaaS 产品，也能提到需求、用户和业务目标之间的关系。这说明她具备产品经理的基础工作认知。与 CEO 希望的“能快速理解业务问题”的画像相比，她有基础但深度不足。后续需要通过更具体案例判断她是否能独立承担核心模块。"},
+        {name:"案例完整度",grade:"C",reason:"她在项目介绍中更多描述职责范围，对用户问题、方案取舍和最终结果讲得较少。回答没有形成足够完整的背景、行动、结果和复盘链路。CEO 理想候选人需要能清楚证明自己做成过什么，她在这一点上证据不足。建议下一轮要求她用一个完整项目复盘来重新说明能力边界。"},
+        {name:"岗位匹配度",grade:"B",reason:"她的 SaaS 背景与 AI 教育产品中的管理、工具和流程场景存在一定迁移空间。候选人对产品工作有基础理解，也表现出愿意学习和沟通的态度。与 CEO 画像中“有创业环境下强推进能力”的要求相比，她目前还没有给出足够证明。匹配度需要依赖后续追问验证。"},
+        {name:"结构化表达",grade:"C",reason:"陈晓雨回答时偶尔会先说结论再补背景，逻辑顺序不够稳定。这样的表达容易让面试官难以判断她的真实贡献和判断过程。CEO 理想候选人需要能在高频沟通中快速对齐重点，她在这一点上还需要训练。建议使用“问题-分析-行动-结果”的框架重新组织项目表达。"},
+      ],
+      process:[
+        {stage:"自我介绍阶段",text:"陈晓雨介绍了自己 3 年产品经验和 B 端 SaaS 背景，说明了过去主要负责的产品方向。整体态度真诚，但亮点和岗位相关性提炼不够集中。"},
+        {stage:"项目经历阶段",text:"她讲述了过往 SaaS 项目的经历，能够说明职责范围，但对项目规模、关键难点、个人贡献和最终指标展开较少。面试官需要继续追问才能获得更完整判断。"},
+        {stage:"追问复盘阶段",text:"在追问项目反思和结果验证时，她的回答偏概括，对失败原因和下一步优化缺少系统总结。建议后续重点考察结构化表达、数据意识和独立负责能力。"},
+      ],
+    },
+    c3:{
+      total,
+      isExcellent,
+      tier,
+      overallText:"李宇航在增长运营负责人面试中的整体表现非常好，回答有重点，也能用过往增长经历支撑自己的判断。他最突出的维度是增长方法论、数据意识和项目推动能力，能够围绕获客、激活、留存和转化拆解问题，并用 GMV 增长等结果说明项目价值。沟通表达稳定，能把增长实验的思路讲清楚，体现出较强的结果导向。相对较弱的是早期创业公司资源受限场景下的取舍策略，他对成熟平台经验讲得更充分，对小团队低预算冷启动讲得还不够细。与 CEO 理想候选人画像相比，他高度满足“数据驱动、能快速试错、能推动增长项目”的要求。差异在于团队管理和资源约束下的优先级判断还需要进一步验证。综合判断，他与增长运营负责人岗位匹配度很高，可以作为优秀候选人推进。",
+      excellentReason:"李宇航被归为优秀候选人，主要因为他不仅能讲清增长策略，还能用具体结果证明自己参与过有效增长项目。他的经验、方法论和结果导向都与 CEO 对增长负责人的核心期待高度匹配。",
+      nextInterviewAdvice:"下一轮建议重点考察他在早期团队低预算场景下如何设计增长闭环，以及如何搭建增长团队和 SOP。也建议追问一次失败增长实验，判断他的风险意识和复盘能力。",
+      dimensions:[
+        {name:"增长方法论",grade:"A",reason:"李宇航在回答增长体系问题时，能够围绕获客、激活、留存和转化拆解，而不是只谈单点活动。这说明他对增长链路有系统理解，具备负责人岗位需要的框架能力。CEO 理想候选人需要能从 0 到 1 搭建增长体系，他在这一点上非常接近。后续可继续追问他如何根据公司阶段选择最优增长抓手。"},
+        {name:"数据与结果意识",grade:"A",reason:"他在回答中主动提到 GMV 增长等结果，并能把项目动作和业务结果连接起来。这体现出较强的数据意识和结果导向，也说明他习惯用指标评估增长效果。CEO 曾强调增长岗位要对核心指标负责，李宇航在这一点上满足度较高。需要进一步验证的是指标口径、归因方式以及他个人对结果的直接贡献。"},
+        {name:"创业阶段适配",grade:"B",reason:"李宇航的大厂和成熟平台经验比较充分，能说明较完整的增长实验方法。相对不足的是，他对创业公司早期预算有限、品牌弱、团队小的情况下如何启动增长讲得还不够细。CEO 理想候选人需要能在资源受限下快速试错，他目前部分满足。下一轮建议用真实公司场景让他现场设计低成本增长方案。"},
+        {name:"团队推进能力",grade:"A",reason:"从他的回答看，他具备跨团队推进增长项目、复盘实验结果并持续迭代的经验。这体现出较强的执行力和协作意识，也符合增长负责人需要协调产品、市场和数据资源的要求。与 CEO 希望的“能自己下场，也能带团队跑起来”的画像比较接近。还需要补充验证的是他如何设定团队目标和培养成员。"},
+      ],
+      process:[
+        {stage:"自我介绍阶段",text:"李宇航介绍了自己 4 年增长运营经验，并重点提到在 Keep 和滴滴参与用户增长的经历。他能够快速把个人经历和增长运营负责人岗位建立连接，开场表现稳定。"},
+        {stage:"增长项目讲解阶段",text:"他讲述了增长项目从策略制定到实验推进的过程，并提到 GMV 增长 200% 等结果。候选人主要体现出数据驱动、目标拆解和跨团队推进能力，整体说服力较强。"},
+        {stage:"增长体系追问阶段",text:"在追问从 0 到 1 搭建增长体系时，他能够从获客、激活、留存等链路展开。需要继续追问的是，如果当前团队预算有限且品牌尚弱，他会如何确定第一阶段增长优先级。"},
+      ],
+    },
+  };
+  return _nullishCoalesce(byId[c.id], () => (baseReport));
 }
 
 function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, interviewerView=false, ceoName="Alex Chen", ceoSeed="AlexCeo", ceoBg="ffd6e0", company="LUNA AI" }) {
@@ -1628,7 +1763,7 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
                 , React.createElement('span', { style:{fontSize:9,background:T.grad,color:"#fff",borderRadius:999,padding:"1px 6px",fontWeight:800,flexShrink:0} }, "CEO")
               )
               , React.createElement('div', { style: {fontSize:11,color:T.text3,display:"flex",alignItems:"center",gap:6,marginTop:2} }
-                , React.createElement('span', null, "仅你可见 · 匹配度 ", r.overall, "%")
+                , React.createElement('span', null, "仅你可见 · 总分 ", r.total, "/100")
                 , React.createElement('span', { style:{background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"1px 8px",fontWeight:800,fontSize:11} }, r.tier.cn)
               )
             )
@@ -1647,26 +1782,49 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
           )
           , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:16,padding:"14px 0",borderBottom:"1px solid #eef0fb",marginBottom:14,marginTop:12} }
             , React.createElement('div', { style: {textAlign:"center",flexShrink:0} }
-              , React.createElement('div', { style: {fontSize:34,fontWeight:900,color:"#4f46e5",lineHeight:1} }, r.overall, React.createElement('span',{style:{fontSize:15}},"%"))
-              , React.createElement('div', { style: {fontSize:10,color:"#9ca3af",marginTop:2} }, "综合匹配度")
+              , React.createElement('div', { style: {fontSize:34,fontWeight:900,color:"#4f46e5",lineHeight:1} }, r.total)
+              , React.createElement('div', { style: {fontSize:10,color:"#9ca3af",marginTop:2} }, "总分 / 100")
             )
             , React.createElement('div', { style: {flex:1} }
               , React.createElement('div', { style: {display:"inline-flex",alignItems:"center",gap:6,background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"5px 14px",fontSize:14,fontWeight:800,marginBottom:6} }, r.tier.cn)
-              , React.createElement('div', { style: {fontSize:12,color:"#6b7280"} }, "建议动作：", React.createElement('span',{style:{color:"#374151",fontWeight:700}}, r.next))
+              , React.createElement('div', { style: {fontSize:12,color:"#6b7280",lineHeight:1.65} }, "85分以上自动标记为优秀候选人")
             )
           )
-          , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#312e81",marginBottom:10} }, "能力维度")
-          , React.createElement('div', { style: {marginBottom:14} }, r.dims.map(d=>(
-              React.createElement('div', { key: d.name, style: {display:"flex",alignItems:"center",gap:10,marginBottom:9} }
-                , React.createElement('div', { style: {width:72,flexShrink:0,fontSize:12,color:"#374151",fontWeight:600} }, d.name)
-                , React.createElement('div', { style: {flex:1,height:6,background:"#eef0fb",borderRadius:999} }
-                  , React.createElement('div', { style: {height:"100%",background:"linear-gradient(90deg,#818cf8,#4f46e5)",borderRadius:999,width:`${d.score}%`} })
+          , React.createElement(FeedbackSection, { title:"整体评分", accent:"#4f46e5" }
+            , React.createElement('div', { style:{fontSize:12.5,color:"#374151",lineHeight:1.85,padding:"12px 14px",background:"rgba(99,102,241,.06)",border:"1px solid rgba(99,102,241,.12)",borderRadius:12,marginBottom:r.isExcellent?10:0} }, r.overallText)
+            , r.isExcellent?React.createElement('div', { style:{display:"flex",flexDirection:"column",gap:8} }
+                , React.createElement('div', { style:{fontSize:12.5,color:"#065f46",lineHeight:1.75,padding:"10px 12px",background:"rgba(16,185,129,.08)",border:"1px solid rgba(16,185,129,.14)",borderRadius:12} }
+                  , React.createElement('span', { style:{fontWeight:800} }, "优秀原因：")
+                  , r.excellentReason
                 )
-                , React.createElement('span', { style: {fontSize:12,color:"#4f46e5",fontWeight:800,width:24,textAlign:"right",flexShrink:0} }, d.score)
-              )
-            )))
-          , React.createElement('div', { style: {fontSize:12,fontWeight:700,color:"#312e81",marginBottom:6} }, "评估结论")
-          , React.createElement('div', { style: {fontSize:12.5,color:"#374151",lineHeight:1.8} }, r.verdict)
+                , React.createElement('div', { style:{fontSize:12.5,color:"#92400e",lineHeight:1.75,padding:"10px 12px",background:"rgba(245,158,11,.08)",border:"1px solid rgba(245,158,11,.16)",borderRadius:12} }
+                  , React.createElement('span', { style:{fontWeight:800} }, "后续面试建议：")
+                  , r.nextInterviewAdvice
+                )
+              ):null
+          )
+          , React.createElement(FeedbackSection, { title:"各维度评分", accent:"#7c3aed" }
+            , React.createElement('div', { style:{display:"flex",flexDirection:"column",gap:9} }
+              , r.dimensions.map(d=>React.createElement('div', { key:d.name, style:{background:"rgba(255,255,255,.82)",border:"1px solid rgba(99,102,241,.12)",borderRadius:12,padding:"11px 12px"} }
+                , React.createElement('div', { style:{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:6} }
+                  , React.createElement('div', { style:{fontSize:12.5,fontWeight:800,color:"#312e81"} }, d.name)
+                  , React.createElement('span', { style:{fontSize:11,fontWeight:900,color:"#fff",background:d.grade==="A"?"#059669":d.grade==="B"?"#4f46e5":"#d97706",borderRadius:999,padding:"3px 9px",flexShrink:0} }, d.grade, "档")
+                )
+                , React.createElement('div', { style:{fontSize:12.3,color:"#374151",lineHeight:1.78} }, d.reason)
+              ))
+            )
+          )
+          , React.createElement(FeedbackSection, { title:"整体面试过程回顾", accent:"#d97706" }
+            , React.createElement('div', { style:{display:"flex",flexDirection:"column",gap:8} }
+              , r.process.map(p=>React.createElement('div', { key:p.stage, style:{display:"flex",gap:8,background:"rgba(255,255,255,.82)",border:"1px solid rgba(245,158,11,.12)",borderRadius:12,padding:"10px 12px"} }
+                , React.createElement('span', { style:{width:6,height:6,borderRadius:"50%",background:"#d97706",marginTop:8,flexShrink:0} })
+                , React.createElement('div', null
+                  , React.createElement('div', { style:{fontSize:12.5,fontWeight:800,color:"#92400e",marginBottom:3} }, p.stage)
+                  , React.createElement('div', { style:{fontSize:12.3,color:"#374151",lineHeight:1.78} }, p.text)
+                )
+              ))
+            )
+          )
         )
       )
     );
@@ -1709,7 +1867,7 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
             const isCollapsed=_nullishCoalesce(collapsedCards[userKey], () => (true));
             return (
               React.createElement('div', { key: msg.id, ref: reportRef, style: {scrollMarginTop:80} }
-                , React.createElement(UserReportCard, { job: job, score: candidate.score, isCollapsed, onExpand: ()=>setCollapsedCards(p=>({...p,[userKey]:false})), onCollapse: ()=>setCollapsedCards(p=>({...p,[userKey]:true})), footerLabel: "收起报告" })
+                , React.createElement(UserReportCard, { job: job, score: candidate.score, candidate: candidate, isCollapsed, onExpand: ()=>setCollapsedCards(p=>({...p,[userKey]:false})), onCollapse: ()=>setCollapsedCards(p=>({...p,[userKey]:true})), footerLabel: "收起报告" })
               )
             );
           }
@@ -1785,9 +1943,9 @@ const CEO_CONTACTS_V2 = {
   ],
   // 聊过我的 = 候选人列表，已按排序规则：优秀置顶
   chatMe:[
-    {id:"cm1",user:{name:"张明",seed:"zhangming",bg:"b6e3f4"},lastMsg:"面试报告 · AI产品经理 · 82分",time:"今天 10:30",unread:1,unreadType:"real",candidateId:"c1",isExcellent:true},
-    {id:"cm3",user:{name:"李宇航",seed:"liyuhang",bg:"d4edda"},lastMsg:"面试报告 · 增长运营负责人 · 88分",time:"昨天 16:40",unread:0,unreadType:"ai",candidateId:"c3",isExcellent:true},
-    {id:"cm2",user:{name:"陈晓雨",seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试报告 · AI产品经理 · 76分",time:"今天 09:15",unread:3,unreadType:"ai",candidateId:"c2",isExcellent:false},
+    {id:"cm1",user:{name:"张明",seed:"zhangming",bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分",time:"今天 10:30",unread:1,unreadType:"real",candidateId:"c1",isExcellent:true},
+    {id:"cm3",user:{name:"李宇航",seed:"liyuhang",bg:"d4edda"},lastMsg:"面试反馈 · 增长运营负责人 · 非常好 · 88分",time:"昨天 16:40",unread:0,unreadType:"ai",candidateId:"c3",isExcellent:true},
+    {id:"cm2",user:{name:"陈晓雨",seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试反馈 · AI产品经理 · 表现一般 · 76分",time:"今天 09:15",unread:3,unreadType:"ai",candidateId:"c2",isExcellent:false},
   ],
 };
 
@@ -1796,8 +1954,8 @@ const USER_CONTACTS_V2 = {
   chatted:[
     {id:"uc1",user:{name:"Tracy",seed:"Tracy",bg:"b6e3f4"},lastMsg:"感谢你的分享，祝留学顺利！",time:"刚刚",unread:0,unreadType:null},
     {id:"uc2",user:{name:"Sabrina LU",seed:"Sabrina",bg:"d1d4f9"},lastMsg:"可以的，下次继续聊～",time:"10分钟前",unread:2,unreadType:"real"},
-    {id:"ui1",user:{name:"Alex Chen",seed:"AlexCeo",bg:"ffd6e0",isCeo:true},lastMsg:"面试报告 · AI产品经理 · 78分 · 已完成",time:"1小时前",unread:1,unreadType:"real",ceoInvite:true},
-    {id:"ui2",user:{name:"Linda Wei",seed:"LindaCeo",bg:"d4edda",isCeo:true},lastMsg:"面试报告 · 前端开发工程师 · 等待面试",time:"4天前",unread:0,unreadType:"ai"},
+    {id:"ui1",user:{name:"Alex Chen",seed:"AlexCeo",bg:"ffd6e0",isCeo:true},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 已完成",time:"1小时前",unread:1,unreadType:"real",ceoInvite:true,jobTitle:"AI产品经理",reportScore:78},
+    {id:"ui2",user:{name:"Linda Wei",seed:"LindaCeo",bg:"d4edda",isCeo:true},lastMsg:"面试反馈 · 前端开发工程师 · 等待面试",time:"4天前",unread:0,unreadType:"ai"},
   ],
   chatMe:[
     {id:"um3",user:{name:"林悦",seed:"chenxiaoyu",bg:"e0f2fe"},lastMsg:"TA的AI先回复了你，本人随后也回复了你",time:"30分钟前",unread:2,unreadType:"real",fourway:true},
@@ -1971,7 +2129,7 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
   const moveToChatted=(item)=>{
     if(!item) return;
     setChatMeList(prev=>prev.filter(i=>i.id!==item.id));
-    const moved={ id:"moved_"+item.id, user:item.user, lastMsg:"你已回复 · 对话转入「我聊过的」", time:"刚刚", unread:0, unreadType:null, isCandidate:item.isCandidate };
+    const moved={ id:"moved_"+item.id, user:item.user, lastMsg:"你已回复 · 对话转入「我聊过的」", time:"刚刚", unread:0, unreadType:null, isCandidate:item.isCandidate, ceoInvite:item.ceoInvite, jobTitle:item.jobTitle, reportScore:item.reportScore };
     if(useSharedChatted) setUserChatted(prev=> prev.some(i=>i.id===moved.id) ? prev : [moved, ...prev]);
     else setChattedLocal(prev=> prev.some(i=>i.id===moved.id) ? prev : [moved, ...prev]);
     setMainTab("chatted");
@@ -1983,7 +2141,9 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
     user: { name:openChatItem.user.name, seed:openChatItem.user.seed, bg:openChatItem.user.bg, isCeo:openChatItem.user.isCeo, isFounder:openChatItem.user.isFounder, tags:[], bioFull:openChatItem.lastMsg, price:0, service:false, company:"", industry:"", fundStage:"", companyBio:"" },
     onBack: ()=>setOpenChatItem(null),
     onReplied: ()=>moveToChatted(sourceItem),
-    priorMessages: [{ id:1, side:"them", who:(openChatItem.unreadType==="real"?"real":"ai"), text:openChatItem.lastMsg }],
+    priorMessages: openChatItem.ceoInvite
+      ? [{ id:1, side:"system", type:"interviewReport", job:{id:openChatItem.id+"_job",title:openChatItem.jobTitle||"AI产品经理"}, score:openChatItem.reportScore||78 }]
+      : [{ id:1, side:"them", who:(openChatItem.unreadType==="real"?"real":"ai"), text:openChatItem.lastMsg }],
   });
 
   // 候选人排序：优秀置顶，普通置底；同层内按时间倒序（保持原顺序）
