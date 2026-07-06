@@ -130,7 +130,7 @@ const CEO_JOBS = {
 
 // 示例候选人数据
 const CANDIDATES = [
-  { id:"c1", name:"张明", seed:"zhangming", bg:"b6e3f4", job:"AI产品经理", score:82, isExcellent:true,  time:"今天 10:30", msgs:[
+  { id:"c1", name:"张明", seed:"zhangming", bg:"b6e3f4", job:"AI产品经理", score:82, isExcellent:false, time:"今天 10:30", msgs:[
     {id:1,side:"them",who:"ai",  text:"你好，欢迎参加AI产品经理岗位面试。请先做个自我介绍。"},
     {id:2,side:"me",  who:"real",text:"你好！我叫张明，有5年产品经验，在字节做过教育产品，负责过K12在线课堂从0到1的设计..."},
     {id:3,side:"them",who:"ai",  text:"很好！请描述一个你主导过的从0到1的产品经历，你是如何定义核心需求的？"},
@@ -145,6 +145,13 @@ const CANDIDATES = [
     {id:2,side:"me",  who:"real",text:"你好，我是李宇航，4年增长运营经验，在Keep和滴滴做过用户增长，GMV增长了200%..."},
   ]},
 ];
+
+const isExcellentScore = score => Number(score)>=85;
+const isExcellentCandidate = c => !!c && isExcellentScore(c.score);
+const isExcellentContact = item => {
+  const c = item&&item.candidateId ? CANDIDATES.find(x=>x.id===item.candidateId) : null;
+  return c ? isExcellentCandidate(c) : !!(item&&item.isExcellent);
+};
 
 // 与 CEO 之前「随便交流」的历史消息 —— 进入面试时直接带入
 const CEO_PRIOR_CHAT = {
@@ -182,7 +189,7 @@ const CEO_CONTACTS = {
     {id:"cc1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"好的，感谢CEO百忙中回复！期待下一步～",time:"2小时前",unread:0,isCandidate:true},
   ],
   chatMe:[
-    {id:"cm1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分 ⭐ 优秀",time:"今天 10:30",unread:0,candidateId:"c1",isExcellent:true},
+    {id:"cm1",user:{name:"张明",    seed:"zhangming", bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分",time:"今天 10:30",unread:0,candidateId:"c1",isExcellent:false},
     {id:"cm2",user:{name:"陈晓雨",  seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试反馈 · AI产品经理 · 表现一般 · 76分",        time:"今天 09:15",unread:0,candidateId:"c2",isExcellent:false},
     {id:"cm3",user:{name:"李宇航",  seed:"liyuhang",  bg:"d4edda"},lastMsg:"面试反馈 · 增长运营负责人 · 非常好 · 88分 ⭐ 优秀",time:"昨天 16:40",unread:0,candidateId:"c3",isExcellent:true},
   ],
@@ -1606,10 +1613,7 @@ function buildCeoReport(c){
   const clamp=n=>Math.max(58,Math.min(98,Math.round(n)));
   const total=clamp(base);
   const isExcellent=total>=85;
-  const tier = isExcellent?{cn:"优秀候选人",color:"#059669",bg:"rgba(16,185,129,.12)"}
-             : total>=80?{cn:"推荐候选人",color:"#4f46e5",bg:"rgba(99,102,241,.12)"}
-             : total>=72?{cn:"谨慎推荐",color:"#d97706",bg:"rgba(245,158,11,.12)"}
-             :          {cn:"暂缓推进",color:"#6b7280",bg:"rgba(107,114,128,.12)"};
+  const tier = isExcellent?{cn:"优秀候选人",color:"#059669",bg:"rgba(16,185,129,.12)"}:null;
   const baseReport={
     total,
     isExcellent,
@@ -1764,7 +1768,7 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
               )
               , React.createElement('div', { style: {fontSize:11,color:T.text3,display:"flex",alignItems:"center",gap:6,marginTop:2} }
                 , React.createElement('span', null, "仅你可见 · 总分 ", r.total, "/100")
-                , React.createElement('span', { style:{background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"1px 8px",fontWeight:800,fontSize:11} }, r.tier.cn)
+                , r.isExcellent?React.createElement('span', { style:{background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"1px 8px",fontWeight:800,fontSize:11} }, r.tier.cn):null
               )
             )
           )
@@ -1786,7 +1790,7 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
               , React.createElement('div', { style: {fontSize:10,color:"#9ca3af",marginTop:2} }, "总分 / 100")
             )
             , React.createElement('div', { style: {flex:1} }
-              , React.createElement('div', { style: {display:"inline-flex",alignItems:"center",gap:6,background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"5px 14px",fontSize:14,fontWeight:800,marginBottom:6} }, r.tier.cn)
+              , r.isExcellent?React.createElement('div', { style: {display:"inline-flex",alignItems:"center",gap:6,background:r.tier.bg,color:r.tier.color,borderRadius:999,padding:"5px 14px",fontSize:14,fontWeight:800,marginBottom:6} }, r.tier.cn):null
               , React.createElement('div', { style: {fontSize:12,color:"#6b7280",lineHeight:1.65} }, "85分以上自动标记为优秀候选人")
             )
           )
@@ -1839,7 +1843,7 @@ function CandidateChatScreen({ candidate, onBack, scrollTo="bottom", onReplied, 
           , React.createElement(CeoAvPlain, { seed: candidate.seed, bg: candidate.bg, size: 26 })
           , React.createElement('div', { style: {display:"flex",flexDirection:"column",gap:1} }
             , React.createElement('span', { style: {fontWeight:600,fontSize:14,color:T.text1} }, candidate.name)
-            , React.createElement('span', { style: {fontSize:10,color:candidate.isExcellent?"#059669":T.text3,fontWeight:600} }, candidate.isExcellent?"⭐ 优秀候选人":"候选人", " · "  , candidate.job)
+            , React.createElement('span', { style: {fontSize:10,color:isExcellentCandidate(candidate)?"#059669":T.text3,fontWeight:600} }, isExcellentCandidate(candidate)?"⭐ 优秀候选人":"候选人", " · "  , candidate.job)
           )
         )
       )
@@ -1943,7 +1947,7 @@ const CEO_CONTACTS_V2 = {
   ],
   // 聊过我的 = 候选人列表，已按排序规则：优秀置顶
   chatMe:[
-    {id:"cm1",user:{name:"张明",seed:"zhangming",bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分",time:"今天 10:30",unread:1,unreadType:"real",candidateId:"c1",isExcellent:true},
+    {id:"cm1",user:{name:"张明",seed:"zhangming",bg:"b6e3f4"},lastMsg:"面试反馈 · AI产品经理 · 整体较好 · 82分",time:"今天 10:30",unread:1,unreadType:"real",candidateId:"c1",isExcellent:false},
     {id:"cm3",user:{name:"李宇航",seed:"liyuhang",bg:"d4edda"},lastMsg:"面试反馈 · 增长运营负责人 · 非常好 · 88分",time:"昨天 16:40",unread:0,unreadType:"ai",candidateId:"c3",isExcellent:true},
     {id:"cm2",user:{name:"陈晓雨",seed:"chenxiaoyu",bg:"fce7f3"},lastMsg:"面试反馈 · AI产品经理 · 表现一般 · 76分",time:"今天 09:15",unread:3,unreadType:"ai",candidateId:"c2",isExcellent:false},
   ],
@@ -2148,8 +2152,8 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
 
   // 候选人排序：优秀置顶，普通置底；同层内按时间倒序（保持原顺序）
   const sortCandidates = (list) => {
-    const excellent = list.filter(i=>i.isExcellent);
-    const others    = list.filter(i=>!i.isExcellent);
+    const excellent = list.filter(i=>isExcellentContact(i));
+    const others    = list.filter(i=>!isExcellentContact(i));
     return [...excellent, ...others];
   };
 
@@ -2165,8 +2169,8 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
   // subTab 过滤（CEO 候选人列表）
   let list = rawList;
   if(isCeoView && mainTab==="chatMe"){
-    if(subTab==="excellent") list = rawList.filter(i=>i.isExcellent);
-    else if(subTab==="others") list = rawList.filter(i=>!i.isExcellent);
+    if(subTab==="excellent") list = rawList.filter(i=>isExcellentContact(i));
+    else if(subTab==="others") list = rawList.filter(i=>!isExcellentContact(i));
   }
 
   list = list.filter(i=>!search||i.user.name.includes(search));
@@ -2221,6 +2225,7 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
           ? React.createElement('div', { style: {display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:180,color:"#ccc",gap:8,fontSize:13}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1633}}, React.createElement('span', { style: {fontSize:36}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1633}}, "💬"), "暂无记录")
           : list.map((item,idx)=>{
             const isRead = readIds.has(item.id);
+            const itemExcellent = isExcellentContact(item);
             // 已读则不显示badge
             const effectiveUnreadType = isRead ? null : item.unreadType;
             const effectiveUnread = isRead ? 0 : item.unread;
@@ -2234,14 +2239,14 @@ function ContactsScreen({ navActive, onNav, onOpenChat, isCeoView=false, userCha
 
                   , React.createElement('div', { style: {position:"relative",flexShrink:0}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1647}}
                     , React.createElement(CeoAvPlain, { seed: item.user.seed, bg: item.user.bg, size: 48, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1648}})
-                    , item.isExcellent&&React.createElement('div', { style: {position:"absolute",bottom:-1,right:-1,background:"#f59e0b",borderRadius:999,width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",border:"1.5px solid #fff",fontSize:9,fontWeight:800}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1649}}, "⭐")
+                    , itemExcellent&&React.createElement('div', { style: {position:"absolute",bottom:-1,right:-1,background:"#f59e0b",borderRadius:999,width:16,height:16,display:"flex",alignItems:"center",justifyContent:"center",border:"1.5px solid #fff",fontSize:9,fontWeight:800}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1649}}, "⭐")
                     , item.ceoInvite&&React.createElement('div', { style: {position:"absolute",bottom:-1,right:-1,background:"#f59e0b",borderRadius:999,width:14,height:14,display:"flex",alignItems:"center",justifyContent:"center",border:"1.5px solid #fff",fontSize:8}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1650}}, "★")
                   )
                   , React.createElement('div', { style: {flex:1,minWidth:0}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1652}}
                     , React.createElement('div', { style: {display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1653}}
                       , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1654}}
                         , React.createElement('span', { style: {fontWeight:600,fontSize:14,color:T.text1}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1655}}, item.user.name)
-                        , item.isExcellent&&React.createElement('span', { style: {fontSize:10,background:"#fef3c7",color:"#d97706",borderRadius:999,padding:"1px 6px",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1656}}, "优秀")
+                        , itemExcellent&&React.createElement('span', { style: {fontSize:10,background:"#fef3c7",color:"#d97706",borderRadius:999,padding:"1px 6px",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1656}}, "优秀")
                         , item.ceoInvite&&React.createElement('span', { style: {fontSize:10,background:"#fef3c7",color:"#d97706",borderRadius:999,padding:"1px 6px",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1657}}, "约聊")
                       )
                       , React.createElement('span', { style: {fontSize:11,color:T.text3}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 1659}}, item.time)
@@ -2913,9 +2918,9 @@ function JobEditScreen({ job, onBack, onSave, onDelete }) {
 }
 
 function InterviewDataScreen({ job, onBack, companyProfile={} }) {
-  const excellentCandidates=CANDIDATES.filter(c=>c.job===job.title&&c.isExcellent);
-  const otherCandidates=CANDIDATES.filter(c=>c.job===job.title&&!c.isExcellent);
-  const [tab,setTab]=useState("excellent");
+  const excellentCandidates=CANDIDATES.filter(c=>c.job===job.title&&isExcellentCandidate(c));
+  const otherCandidates=CANDIDATES.filter(c=>c.job===job.title&&!isExcellentCandidate(c));
+  const [tab,setTab]=useState(excellentCandidates.length?"excellent":"others");
   const [chatC,setChatC]=useState(null);
   const [chatScroll,setChatScroll]=useState("bottom");
   const openChat=(c,where)=>{ setChatScroll(where); setChatC(c); };
@@ -2943,7 +2948,7 @@ function InterviewDataScreen({ job, onBack, companyProfile={} }) {
             , React.createElement('div', { style: {flex:1}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2263}}
               , React.createElement('div', { style: {display:"flex",alignItems:"center",gap:6,marginBottom:3}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2264}}
                 , React.createElement('span', { style: {fontWeight:700,fontSize:14,color:T.text1}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2265}}, c.name)
-                , c.isExcellent&&React.createElement('span', { style: {fontSize:10,background:"#fef3c7",color:"#d97706",borderRadius:999,padding:"1px 6px",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2266}}, "优秀")
+                , isExcellentCandidate(c)&&React.createElement('span', { style: {fontSize:10,background:"#fef3c7",color:"#d97706",borderRadius:999,padding:"1px 6px",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2266}}, "优秀")
               )
               , React.createElement('div', { style: {fontSize:11,color:T.text3}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2268}}, c.job, " · 评分 "   , React.createElement('span', { style: {color:"#059669",fontWeight:700}, __self: this, __source: {fileName: _jsxFileName, lineNumber: 2268}}, c.score, "分"), " · "  , c.time)
             )
@@ -3020,7 +3025,7 @@ function RecruitmentScreen({ onBack, jobs: externalJobs, onJobsUpdate, companyPr
   const cp=companyProfile||{};
   const hasCompany=cp.published!==false&&cp.companyBio&&cp.companyBio.trim();
 
-  const excellentCount=CANDIDATES.filter(c=>c.isExcellent).length;
+  const excellentCount=CANDIDATES.filter(c=>isExcellentCandidate(c)).length;
   const completedCount=CANDIDATES.length;
   const applyCount=CANDIDATES.length+2;
 
